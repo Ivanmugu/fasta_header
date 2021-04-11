@@ -5,11 +5,11 @@
 File name:          fasta_header.py
 Author:             Ivan Munoz-Gutierrez
 Date created:       04/02/2021
-Date last modified: 04/02/2021
+Date last modified: 04/11/2021
 Python version:     3.9
 Description:        Change header's name of the fasta sequences that are inside
                     of the assembly.fasta file created by Unicycler. The
-                    headers are re-named following the next style:
+                    headers are renamed following the next style:
                     SWXXXX_method_length_topology
 """
 
@@ -85,6 +85,40 @@ def user_input():
 
     return args
 
+def check_name_folder_infile(name_folder_infile):
+    """
+    Check the correct style of infile's folder name according to MSP.
+
+    Parameters
+    ----------
+    name_folder_infile : string
+
+    Returns
+    -------
+    name : string
+        Infile's folder name with the correct style.
+    """
+    # If name has a dash at its end, remove it.
+    if name_folder_infile[len(name_folder_infile) - 1:] == '-':
+        name_folder_infile = name_folder_infile[: -1]
+    # If name_folder_infile has underscore at its end, remove it.
+    if name_folder_infile[len(name_folder_infile) - 1:] == '_':
+        name_folder_infile = name_folder_infile[: -1]
+    # Split name_folder_infile using "_" as delimiter.
+    name_folder_infile = name_folder_infile.split("_")
+    # Lengh of name_folder_infile.
+    length_name_folder_infile = len(name_folder_infile)
+    # Iterate over name_folder_infile to reconect tags with the correct style.
+    for index, tag in enumerate(name_folder_infile):
+        if index == 0:
+            name = tag + "_"
+        elif index == (length_name_folder_infile - 1):
+            name += tag + "_"
+        else:
+            name += tag + "-"
+
+    return name
+
 
 def process_arguments(args):
     """
@@ -121,18 +155,9 @@ def process_arguments(args):
     # Getting name of folder that contains input file.
     name_folder_infile = os.path.basename(path_folder_infile)
 
-    # If name_folder_infile has a dash at its end, replace it with underscore
-    # (in our lab we add a dash at the end of folder name).
-    if name_folder_infile[len(name_folder_infile) - 1:] == '-':
-        name_folder_infile = name_folder_infile[: -1]
-        name_folder_infile = name_folder_infile + '_'
-    # If name_folder_infile has underscore at its end, ignore.
-    elif name_folder_infile[len(name_folder_infile) - 1:] == '_':
-        pass
-    # Otherwise add underscore at its end.
-    else:
-        name_folder_infile = name_folder_infile + '_'
-    arguments["name_folder_infile"] = name_folder_infile
+    # Checking if the name of the infile's folder has correct style name.
+    arguments["name_folder_infile"] = check_name_folder_infile(
+        name_folder_infile) 
 
     # Getting path to output folder.
     if args.output is None:
