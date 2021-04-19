@@ -5,7 +5,7 @@
 File name:          fasta_header.py
 Author:             Ivan Munoz-Gutierrez
 Date created:       04/02/2021
-Date last modified: 04/11/2021
+Date last modified: 04/18/2021
 Python version:     3.9
 Description:        Change header's name of the fasta sequences that are inside
                     of the assembly.fasta file created by Unicycler. The
@@ -18,22 +18,20 @@ import os
 import argparse
 import textwrap
 
+
 def user_input():
     """
-    Parse command line arguments provided by the user.
-
-    Parameters
-    ----------
-    --input and --output
-        Command line arguments provided by the user.
+    Parse command line arguments provided by the user and provide help if
+    requested by user or if there is a wrong command.
 
     Returns
     -------
     argparse object (.input and .output)
         .input : string
-            Path to the fasta file that will be processed.
+            Path to the fasta file that will be processed. This argument is
+            mandatory.
         .output : string
-            Path to the output directory.
+            Path to the output directory. This argument is optional.
     """
     # Creating a parser object for parsing arguments.
     parser = argparse.ArgumentParser(
@@ -85,40 +83,6 @@ def user_input():
 
     return args
 
-def check_name_folder_infile(name_folder_infile):
-    """
-    Check the correct style of infile's folder name according to MSP.
-
-    Parameters
-    ----------
-    name_folder_infile : string
-
-    Returns
-    -------
-    name : string
-        Infile's folder name with the correct style.
-    """
-    # If name has a dash at its end, remove it.
-    if name_folder_infile[len(name_folder_infile) - 1:] == '-':
-        name_folder_infile = name_folder_infile[: -1]
-    # If name_folder_infile has underscore at its end, remove it.
-    if name_folder_infile[len(name_folder_infile) - 1:] == '_':
-        name_folder_infile = name_folder_infile[: -1]
-    # Split name_folder_infile using "_" as delimiter.
-    name_folder_infile = name_folder_infile.split("_")
-    # Lengh of name_folder_infile.
-    length_name_folder_infile = len(name_folder_infile)
-    # Iterate over name_folder_infile to reconect tags with the correct style.
-    for index, tag in enumerate(name_folder_infile):
-        if index == 0:
-            name = tag + "_"
-        elif index == (length_name_folder_infile - 1):
-            name += tag + "_"
-        else:
-            name += tag + "-"
-
-    return name
-
 
 def process_arguments(args):
     """
@@ -137,6 +101,10 @@ def process_arguments(args):
         {"input_file": "~/Documents/assemblies/assembly.fasta",
          "name_folder_infile": "assemblies",
          "output_folder": "~/Documents/results"}
+
+    Note:
+    MSP's style of infile's folder name is described in the epilog variable of
+    the user_input function.
     """
     arguments = {"input_file": args.input}
     # Checking if user provided correct arguments.
@@ -169,9 +137,48 @@ def process_arguments(args):
     return arguments
 
 
+def check_name_folder_infile(name_folder_infile):
+    """
+    Check the correct style of infile's folder name according to MSP.
+
+    Parameters
+    ----------
+    name_folder_infile : string
+
+    Returns
+    -------
+    name : string
+        Infile's folder name with the correct style.
+
+    Note:
+    MSP's style of infile's folder name is described in the epilog variable of
+    the user_input function.
+    """
+    # If name has a dash at its end, remove it.
+    if name_folder_infile[len(name_folder_infile) - 1:] == '-':
+        name_folder_infile = name_folder_infile[: -1]
+    # If name_folder_infile has underscore at its end, remove it.
+    if name_folder_infile[len(name_folder_infile) - 1:] == '_':
+        name_folder_infile = name_folder_infile[: -1]
+    # Split name_folder_infile using "_" as delimiter.
+    name_folder_infile = name_folder_infile.split("_")
+    # Lengh of name_folder_infile.
+    length_name_folder_infile = len(name_folder_infile)
+    # Iterate over name_folder_infile to reconect tags with the correct style.
+    for index, tag in enumerate(name_folder_infile):
+        if index == 0:
+            name = tag + "_"
+        elif index == (length_name_folder_infile - 1):
+            name += tag + "_"
+        else:
+            name += tag + "-"
+
+    return name
+
+
 def make_new_header(header, name_folder_infile):
     """
-    Make new header according to MSP style.
+    Make new fasta header according to MSP style.
 
     Parameters
     ----------
@@ -184,6 +191,10 @@ def make_new_header(header, name_folder_infile):
     -------
     new_header : string
         Renamed header of fasta sequence.
+
+    Note:
+    MSP's style of infile's folder name is described in the epilog variable of
+    the user_input function.
     """
     # Information needed.
     length = ""
@@ -217,6 +228,10 @@ def rename_headers(input_file, name_folder_infile, path_output):
         Folder's name that contains the input fasta file.
     path_output : string
         Path to output directory.
+
+    Note:
+    MSP's style of infile's folder name is described in the epilog variable of
+    the user_input function.
     """
     # Opening input file for reading.
     with open(input_file, "r") as file_reader:
@@ -235,18 +250,21 @@ def rename_headers(input_file, name_folder_infile, path_output):
                     file_writer.write(line)
 
 
-# -------------------
-# Running the program
-# -------------------
-# Getting user input.
-args = user_input()
-# Processing arguments provided by user to get input for the function
-# rename_headers.
-input_rename_headers = process_arguments(args)
-# Renaming headers
-rename_headers(
-    input_rename_headers["input_file"],
-    input_rename_headers["name_folder_infile"],
-    input_rename_headers["path_output"])
-# If everything went well print a message
-print("Headers were succesfully renamed!")
+def main():
+    """Run the script"""
+    # Getting user input.
+    args = user_input()
+    # Processing arguments provided by user to get input for the function
+    # rename_headers.
+    input_rename_headers = process_arguments(args)
+    # Renaming headers
+    rename_headers(
+        input_rename_headers["input_file"],
+        input_rename_headers["name_folder_infile"],
+        input_rename_headers["path_output"])
+    # If everything went well print a message
+    print("Headers were succesfully renamed!")
+
+
+if __name__ == "__main__":
+    main()
